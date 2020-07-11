@@ -1,13 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace ESGI.DesignPattern.Projet
 {
     public class OrdersWriter
     {
-        private Orders orders;
+        private List<Order> orders;
 
-        public OrdersWriter(Orders orders)
+        public OrdersWriter(List<Order> orders)
         {
             this.orders = orders;
         }
@@ -15,46 +16,21 @@ namespace ESGI.DesignPattern.Projet
         public string GetContents()
         {
             StringBuilder xml = new StringBuilder();
-            xml.Append("<orders>");
-            for (int i = 0; i < this.orders.OrderCount(); i++)
+            xml.Append(OpeningOrdersBracket());
+            for (int i = 0; i < this.orders.Count; i++)
             {
-                Order order = this.orders.Order(i);
-                xml.Append("<order");
-                xml.Append(" id='");
-                xml.Append(order.OrderId());
-                xml.Append("'>");
+                Order order = this.orders[i];
+                xml.Append(OpeningOrderBracket(order.OrderId()));
                 for (int j = 0; j < order.ProductCount(); j++)
                 {
                     Product product = order.Product(j);
-                    xml.Append("<product");
-                    xml.Append(" id='");
-                    xml.Append(product.ID);
-                    xml.Append("'");
-                    xml.Append(" color='");
-                    xml.Append(this.ColorFor(product));
-                    xml.Append("'");
-                    if (product.Size != (int)ProductSize.NotApplicable)
-                    {
-                        xml.Append(" size='");
-                        xml.Append(this.SizeFor(product));
-                        xml.Append("'");
-                    }
-
-                    xml.Append(">");
-                    xml.Append("<price");
-                    xml.Append(" currency='");
-                    xml.Append(this.CurrencyFor(product));
-                    xml.Append("'>");
-                    xml.Append(product.Price);
-                    xml.Append("</price>");
-                    xml.Append(product.Name);
-                    xml.Append("</product>");
+                    xml.Append(ProductString(product));
                 }
-
-                xml.Append("</order>");
+                
+                xml.Append(ClosingOrderBracket());
             }
 
-            xml.Append("</orders>");
+            xml.Append(ClosingOrdersBracket());
             return xml.ToString();
         }
 
@@ -77,6 +53,39 @@ namespace ESGI.DesignPattern.Projet
         private string ColorFor(Product product)
         {
             return "red";
+        }
+
+        private string OpeningOrdersBracket(){
+            return "<orders>";
+        }
+
+        private string OpeningOrderBracket(int orderId){
+            return "<order id='"+orderId+"'>"; 
+        }
+
+        private string ProductString(Product product){
+            StringBuilder productStr = new StringBuilder();
+            productStr.Append("<product id='" + product.ID + "' color='red'");
+            if (product.Size != (int)ProductSize.NotApplicable)
+            {
+                productStr.Append(" size='" +this.SizeFor(product)+"'");
+            }
+            productStr.Append(">");
+            productStr.Append("<price currency='" +this.CurrencyFor(product)+"'>"+
+                product.Price+
+                "</price>");
+
+            productStr.Append(product.Name);
+            productStr.Append("</product>");
+            return productStr.ToString();
+        }
+
+        private string ClosingOrderBracket(){
+            return "</order>";
+        }
+
+        private string ClosingOrdersBracket(){
+            return "</orders>";
         }
     }
 }
